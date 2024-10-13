@@ -1,5 +1,6 @@
 import { useContext } from "react";
 
+import Chat from "./pages/Chat";
 import Register from "./pages/Register";
 import { UserContext } from "./UserContext";
 
@@ -12,8 +13,7 @@ const Routes = () => {
 
   return (
     <>
-      <h1>Welcome, {username}!</h1>
-      <p>Your unique ID: {id}</p>
+      <Chat username={username} id={id} />
     </>
   );
 };
