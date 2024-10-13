@@ -1,10 +1,37 @@
+import { useState, useEffect } from "react";
 import { VscSend } from "react-icons/vsc";
 
 const Chat = () => {
+  const [ws, setWs] = useState(null);
+  const [onlinePeople, setOnlinePeople] = useState({});
+
+  const showOnlinePeople = (peopleArray) => {
+    const people = {};
+    peopleArray.forEach(({ userId }) => {
+      people[userId] = userId;
+    });
+    setOnlinePeople(people);
+  };
+
+  const handleMessage = (e) => {
+    const messageData = JSON.parse(e.data);
+    if ("online" in messageData) {
+      showOnlinePeople(messageData.online);
+    }
+  };
+
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:8000");
+    setWs(ws);
+    ws.addEventListener("message", handleMessage);
+  }, []);
+
   return (
     <div className="flex h-screen">
       <div className="bg-white w-1/4 p-5">
-        <h4>Contacts</h4>
+        {Object.keys(onlinePeople).map((people) => (
+          <h4 key={people}>{people}</h4>
+        ))}
       </div>
 
       <div className="bg-blue-50 w-3/4 flex flex-col p-5">

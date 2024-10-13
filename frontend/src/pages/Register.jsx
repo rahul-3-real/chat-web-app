@@ -76,7 +76,7 @@ const Register = () => {
           {pageView === "register" && (
             <p className="block mt-4">
               Already a member? &nbsp;
-              <button onClick={() => setPageView("login")}>Login In</button>
+              <button onClick={() => setPageView("login")}>Login</button>
             </p>
           )}
           {pageView === "login" && (
