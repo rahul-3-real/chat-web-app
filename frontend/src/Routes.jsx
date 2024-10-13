@@ -1,23 +1,19 @@
 import { useContext } from "react";
 
-import { Register } from "./pages";
+import Register from "./pages/Register";
 import { UserContext } from "./UserContext";
 
 const Routes = () => {
   const { username, id } = useContext(UserContext);
 
-  if (username) {
-    return (
-      <div>
-        <h1>Welcome, {username}!</h1>
-        <p>Your unique ID: {id}</p>
-      </div>
-    );
+  if (!username || !id) {
+    return <Register />;
   }
 
   return (
     <>
-      <Register />
+      <h1>Welcome, {username}!</h1>
+      <p>Your unique ID: {id}</p>
     </>
   );
 };

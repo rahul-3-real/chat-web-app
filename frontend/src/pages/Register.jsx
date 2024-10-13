@@ -6,12 +6,16 @@ import { UserContext } from "../UserContext";
 const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [pageView, setPageView] = useState("register");
 
   const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
 
-  const register = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await axios.post("/auth/register", { username, password });
+    const response = await axios.post(`/auth/${pageView}`, {
+      username,
+      password,
+    });
     setLoggedInUsername(response.data.user.username);
     setId(response.data.user._id);
   };
@@ -19,9 +23,12 @@ const Register = () => {
   return (
     <>
       <div className="w-full max-w-xs mx-auto my-10">
+        <h4 className="mb-5 text-2xl font-bold">
+          {pageView === "register" ? "Register" : "Login"}
+        </h4>
         <form
           className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-          onSubmit={register}
+          onSubmit={handleSubmit}
         >
           <div className="mb-4">
             <label
@@ -62,9 +69,22 @@ const Register = () => {
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               type="submit"
             >
-              Register
+              {pageView !== "register" ? "Login" : "Register"}
             </button>
           </div>
+
+          {pageView === "register" && (
+            <p className="block mt-4">
+              Already a member? &nbsp;
+              <button onClick={() => setPageView("login")}>Login In</button>
+            </p>
+          )}
+          {pageView === "login" && (
+            <p className="block mt-4">
+              Not a member? &nbsp;
+              <button onClick={() => setPageView("register")}>Register</button>
+            </p>
+          )}
         </form>
       </div>
     </>

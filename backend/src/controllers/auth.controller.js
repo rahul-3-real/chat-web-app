@@ -59,4 +59,33 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// Login Controller
+router.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res
+      .status(400)
+      .json({ message: "Username and password are required." });
+  }
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user || user.password === password) {
+      return res.status(401).json({ message: "Invalid credentials." });
+    }
+
+    jwt.sign({ userId: user._id }, JWT_key, {}, (err, token) => {
+      if (err) throw err;
+
+      res
+        .status(201)
+        .cookie("token", token)
+        .json({ user, message: "User Logged In successfully." });
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;
