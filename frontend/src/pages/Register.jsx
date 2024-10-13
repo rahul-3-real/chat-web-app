@@ -1,13 +1,28 @@
-import { useState } from "react";
+import axios from "axios";
+import { useState, useContext } from "react";
+
+import { UserContext } from "../UserContext";
 
 const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
+
+  const register = async (e) => {
+    e.preventDefault();
+    const response = await axios.post("/auth/register", { username, password });
+    setLoggedInUsername(response.data.user.username);
+    setId(response.data.user._id);
+  };
+
   return (
     <>
       <div className="w-full max-w-xs mx-auto my-10">
-        <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <form
+          className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+          onSubmit={register}
+        >
           <div className="mb-4">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
@@ -21,6 +36,7 @@ const Register = () => {
               type="text"
               placeholder="Username"
               value={username}
+              name="username"
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
@@ -37,13 +53,14 @@ const Register = () => {
               type="password"
               placeholder="Password"
               value={password}
+              name="password"
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
           <div className="flex items-center justify-between">
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              type="button"
+              type="submit"
             >
               Register
             </button>
