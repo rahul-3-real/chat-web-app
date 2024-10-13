@@ -8,6 +8,23 @@ const router = Router();
 // KEYS
 const JWT_key = "1234567890";
 
+// Profile Controller
+router.get("/profile", async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ message: "Unauthorized." });
+
+    const decoded = jwt.verify(token, JWT_key);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) return res.status(404).json({ message: "User not found." });
+
+    res.status(200).json({ user });
+  } catch (error) {
+    return res.status(401).json({ message: "Unauthorized." });
+  }
+});
+
 // Register Controller
 router.post("/register", async (req, res) => {
   const { username, password } = req.body;

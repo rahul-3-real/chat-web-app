@@ -1,12 +1,14 @@
 import cors from "cors";
 import express from "express";
 import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
 
 import AuthRouter from "./controllers/auth.controller.js";
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(
   cors({
     origin: ["http://localhost:3000"],
