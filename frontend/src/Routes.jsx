@@ -11,8 +11,6 @@ const Routes = () => {
     return <Register />;
   }
 
-  console.log(username);
-
   return (
     <>
       <Chat username={username} id={id} />

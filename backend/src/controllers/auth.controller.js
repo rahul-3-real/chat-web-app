@@ -46,14 +46,19 @@ router.post("/register", async (req, res) => {
     const user = new User({ username, password });
     const createdUser = await user.save();
 
-    jwt.sign({ userId: createdUser._id }, JWT_key, {}, (err, token) => {
-      if (err) throw err;
+    jwt.sign(
+      { userId: createdUser._id, username: createdUser.username },
+      JWT_key,
+      {},
+      (err, token) => {
+        if (err) throw err;
 
-      res
-        .status(201)
-        .cookie("token", token)
-        .json({ user: createdUser, message: "User registered successfully." });
-    });
+        res.status(201).cookie("token", token).json({
+          user: createdUser,
+          message: "User registered successfully.",
+        });
+      }
+    );
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -75,14 +80,19 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials." });
     }
 
-    jwt.sign({ userId: user._id }, JWT_key, {}, (err, token) => {
-      if (err) throw err;
+    jwt.sign(
+      { userId: user._id, username: user.username },
+      JWT_key,
+      {},
+      (err, token) => {
+        if (err) throw err;
 
-      res
-        .status(201)
-        .cookie("token", token)
-        .json({ user, message: "User Logged In successfully." });
-    });
+        res
+          .status(201)
+          .cookie("token", token)
+          .json({ user, message: "User Logged In successfully." });
+      }
+    );
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

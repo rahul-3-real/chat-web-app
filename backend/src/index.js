@@ -49,14 +49,18 @@ wss.on("connection", (connection, req) => {
   jwt.verify(token, JWT_key, {}, (error, userData) => {
     if (error) throw error;
 
-    const { userId } = userData;
+    const { userId, username } = userData;
     connection.userId = userId;
+    connection.username = username;
   });
 
   [...wss.clients].forEach((client) => {
     client.send(
       JSON.stringify({
-        online: [...wss.clients].map((client) => ({ userId: client.userId })),
+        online: [...wss.clients].map((client) => ({
+          userId: client.userId,
+          username: client.username,
+        })),
       })
     );
   });
