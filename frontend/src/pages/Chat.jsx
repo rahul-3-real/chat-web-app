@@ -7,11 +7,18 @@ const Chat = ({ id }) => {
   const [ws, setWs] = useState(null);
   const [onlinePeople, setOnlinePeople] = useState({});
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [newMessage, setNewMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+
+  console.log(messages);
+  console.log(id);
 
   const showOnlinePeople = (peopleArray) => {
     const people = {};
     peopleArray.forEach(({ userId, username }) => {
-      people[userId] = username;
+      if (userId !== id) {
+        people[userId] = username;
+      }
     });
     setOnlinePeople(people);
   };
@@ -21,6 +28,40 @@ const Chat = ({ id }) => {
 
     if ("online" in messageData) {
       showOnlinePeople(messageData.online);
+    } else {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          text: messageData.text,
+          recipient: messageData.recipient,
+          sender: messageData.sender,
+          isOur: false,
+        },
+      ]);
+    }
+  };
+
+  const sendMessage = (e) => {
+    e.preventDefault();
+
+    if (newMessage && ws && selectedUserId) {
+      ws.send(
+        JSON.stringify({
+          recipient: selectedUserId,
+          sender: id,
+          text: newMessage,
+        })
+      );
+      setNewMessage("");
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          text: newMessage,
+          recipient: selectedUserId,
+          sender: id,
+          isOur: true,
+        },
+      ]);
     }
   };
 
@@ -28,35 +69,31 @@ const Chat = ({ id }) => {
     const ws = new WebSocket("ws://localhost:8000");
     setWs(ws);
     ws.addEventListener("message", handleMessage);
-  }, []);
+  }, [id]);
 
   return (
     <div className="flex h-screen">
       <div className="bg-white w-1/4 p-5">
         <Logo />
 
-        {Object.keys(onlinePeople).length <= 1 && (
+        {Object.keys(onlinePeople).length === 0 && (
           <h5 className="text-xl">No one is online.</h5>
         )}
 
-        {Object.keys(onlinePeople).map((people) => {
-          if (people !== id) {
-            return (
-              <Avatar
-                key={people}
-                username={onlinePeople[people]}
-                userId={people}
-                selectedUserId={selectedUserId}
-                setSelectedUserId={setSelectedUserId}
-              />
-            );
-          }
-        })}
+        {Object.keys(onlinePeople).map((userId) => (
+          <Avatar
+            key={userId}
+            username={onlinePeople[userId]}
+            userId={userId}
+            selectedUserId={selectedUserId}
+            setSelectedUserId={setSelectedUserId}
+          />
+        ))}
       </div>
 
       <div className="bg-blue-50 w-3/4 flex flex-col p-5">
         <div className="flex-grow">
-          {Object.keys(onlinePeople).length <= 1 && (
+          {Object.keys(onlinePeople).length === 0 && (
             <h5 className="text-xl h-full w-full flex items-center justify-center text-gray-400">
               No one is online.
             </h5>
@@ -67,19 +104,50 @@ const Chat = ({ id }) => {
               Please select a user to chat.
             </h5>
           )}
+
+          {selectedUserId && (
+            <div className="flex flex-col gap-2">
+              {messages.map((message) => (
+                <div
+                  key={message.text}
+                  className={`flex ${
+                    message.isOur ? "flex-row-reverse" : "flex-row"
+                  } gap-2`}
+                >
+                  <div className="bg-gray-200 p-2 rounded-sm">
+                    {message.text}
+                  </div>
+                  <div className="bg-blue-500 p-2 rounded-sm text-white text-sm">
+                    {message.recipient === id ? selectedUserId : "You"}
+                  </div>
+                </div>
+              ))}
+
+              <div className="flex justify-end text-gray-400 text-sm">
+                Last updated: {new Date().toLocaleTimeString()}
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Type your message here"
-            className="bg-white flex-grow border rounded-sm p-2 outline-none"
-          />
+        {selectedUserId && (
+          <form className="flex gap-2" onSubmit={sendMessage}>
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type your message here"
+              className="bg-white flex-grow border rounded-sm p-2 outline-none"
+            />
 
-          <button className="bg-blue-500 py-2 px-4 text-white rounded-sm">
-            <VscSend />
-          </button>
-        </div>
+            <button
+              type="submit"
+              className="bg-blue-500 py-2 px-4 text-white rounded-sm"
+            >
+              <VscSend />
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

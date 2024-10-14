@@ -20,6 +20,7 @@ const Avatar = ({ username, userId, selectedUserId, setSelectedUserId }) => {
           userId === selectedUserId ? "bg-blue-200" : "bg-slate-100"
         }`}
         onClick={() => setSelectedUserId(userId)}
+        title={userId}
       >
         <div
           className={`w-8 h-8 ${color} rounded-full flex items-center justify-center`}
