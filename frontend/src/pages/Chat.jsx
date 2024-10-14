@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { VscSend } from "react-icons/vsc";
+import { uniqBy } from "lodash";
+
 import Avatar from "../components/Avatar";
 import Logo from "../components/Logo";
 
@@ -28,7 +30,7 @@ const Chat = ({ id }) => {
 
     if ("online" in messageData) {
       showOnlinePeople(messageData.online);
-    } else {
+    } else if ("text" in messageData) {
       setMessages((prevMessages) => [
         ...prevMessages,
         {
@@ -71,6 +73,8 @@ const Chat = ({ id }) => {
     ws.addEventListener("message", handleMessage);
   }, [id]);
 
+  const messagesWithoutDups = uniqBy(messages, "_id");
+
   return (
     <div className="flex h-screen">
       <div className="bg-white w-1/4 p-5">
@@ -92,7 +96,7 @@ const Chat = ({ id }) => {
       </div>
 
       <div className="bg-blue-50 w-3/4 flex flex-col p-5">
-        <div className="flex-grow">
+        <div className="flex flex-col-reverse flex-grow overflow-y-auto">
           {Object.keys(onlinePeople).length === 0 && (
             <h5 className="text-xl h-full w-full flex items-center justify-center text-gray-400">
               No one is online.
@@ -107,31 +111,30 @@ const Chat = ({ id }) => {
 
           {selectedUserId && (
             <div className="flex flex-col gap-2">
-              {messages.map((message) => (
+              {messages.map((message, i) => (
                 <div
-                  key={message.text}
+                  key={`${i}`}
                   className={`flex ${
                     message.isOur ? "flex-row-reverse" : "flex-row"
                   } gap-2`}
                 >
-                  <div className="bg-gray-200 p-2 rounded-sm">
+                  <div
+                    className={`p-2 rounded ${
+                      message.recipient === id
+                        ? "bg-white text-gray-600"
+                        : "bg-blue-500 text-white"
+                    }`}
+                  >
                     {message.text}
-                  </div>
-                  <div className="bg-blue-500 p-2 rounded-sm text-white text-sm">
-                    {message.recipient === id ? selectedUserId : "You"}
                   </div>
                 </div>
               ))}
-
-              <div className="flex justify-end text-gray-400 text-sm">
-                Last updated: {new Date().toLocaleTimeString()}
-              </div>
             </div>
           )}
         </div>
 
         {selectedUserId && (
-          <form className="flex gap-2" onSubmit={sendMessage}>
+          <form className="flex gap-2 mt-3" onSubmit={sendMessage}>
             <input
               type="text"
               value={newMessage}

@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import { WebSocketServer as WSWebSocketServer } from "ws";
 
+import Message from "./models/message.model.js";
 import AuthRouter from "./controllers/auth.controller.js";
 
 const app = express();
@@ -65,14 +66,24 @@ wss.on("connection", (connection, req) => {
     );
   });
 
-  connection.on("message", (message) => {
+  connection.on("message", async (message) => {
     const messageData = JSON.parse(message.toString());
     const { recipient, sender, text } = messageData;
 
     if (recipient && text) {
+      const messageDoc = await Message.create({
+        sender,
+        recipient,
+        text,
+      });
+
       [...wss.clients]
         .filter((c) => c.userId === recipient)
-        .forEach((c) => c.send(JSON.stringify({ text, recipient, sender })));
+        .forEach((c) =>
+          c.send(
+            JSON.stringify({ text, recipient, sender, id: messageDoc._id })
+          )
+        );
     }
   });
 });
