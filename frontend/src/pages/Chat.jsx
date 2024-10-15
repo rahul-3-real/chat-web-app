@@ -62,6 +62,7 @@ const Chat = ({ id }) => {
           recipient: selectedUserId,
           sender: id,
           isOur: true,
+          id: Date.now(),
         },
       ]);
     }
@@ -73,7 +74,7 @@ const Chat = ({ id }) => {
     ws.addEventListener("message", handleMessage);
   }, [id]);
 
-  const messagesWithoutDups = uniqBy(messages, "_id");
+  const messagesWithoutDups = uniqBy(messages, "id");
 
   return (
     <div className="flex h-screen">
